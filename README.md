@@ -1,1 +1,1 @@
-# circleci-cargo-demo
+# cloudsmith-circleci-publish

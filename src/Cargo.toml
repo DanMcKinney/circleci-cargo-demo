@@ -1,0 +1,5 @@
+[package]
+authors = ["Cloudsmith Ltd <support@cloudsmith.io>"]
+name = "cloudsmith-circle-example"
+publish = ["cloudsmith"]
+version = "1.0.8"
