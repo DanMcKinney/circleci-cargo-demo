@@ -1,0 +1,37 @@
+version: 2.1
+
+orbs:
+  cloudsmith: cloudsmith/cloudsmith@1.0.5
+
+jobs:
+  
+  build:
+    docker:
+      - image: cimg/rust:1.82.0
+    steps:
+      - checkout
+      - run: |
+          cd src; cargo package
+      - persist_to_workspace:
+          root: .
+          paths:
+            - src/target/package
+  
+  publish:  
+    docker:
+      - image: cimg/python:3.9
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - cloudsmith/install-cli
+      - run: |
+          CLOUDSMITH_API_KEY=$(curl -X POST -H "Content-Type: application/json" -d "{\"oidc_token\":\"$CIRCLE_OIDC_TOKEN_V2\", \"service_slug\":\"circleci-0yjm\"}" https://api.cloudsmith.io/openid/demo/ | jq -r '.token')
+          cloudsmith push cargo demo/circle-ci src/target/package/*.crate -k $CLOUDSMITH_API_KEY --republish
+
+workflows:
+  cloudsmith_publish:
+    jobs:
+      - build
+      - publish:
+          requires:
+              - build
